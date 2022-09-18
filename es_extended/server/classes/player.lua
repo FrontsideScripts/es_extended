@@ -48,18 +48,47 @@ function CreateExtendedPlayer(playerId, identifier, group, accounts, inventory, 
 		self.setAccountMoney('money', money)
 	end
 
+	-- getMoney (Modified by Frontside Scripts)
 	function self.getMoney()
+		if self.getInventoryItem('cash') ~= "xPlayernil" then
+			local cash = self.getInventoryItem('cash')
+			if cash ~= nil then
+				if self.getAccount('money').money ~= cash.count then
+					self.setAccountMoney('money', cash.count)
+				end
+			else
+				self.setAccountMoney('money', 0)
+			end
+		end
 		return self.getAccount('money').money
 	end
 
+	-- addMoney (Modified by Frontside Scripts)
 	function self.addMoney(money)
 		money = ESX.Math.Round(money)
-		self.addAccountMoney('money', money)
+		if money >= 0 then
+			self.addInventoryItem("cash", money)
+			local cash = self.getInventoryItem('cash')
+			if self.getAccount('money').money ~= cash.count then
+				self.setAccountMoney('money', cash.count)
+			end
+		end
 	end
 
+	-- removeMoney (Modified by Frontside Scripts)
 	function self.removeMoney(money)
 		money = ESX.Math.Round(money)
-		self.removeAccountMoney('money', money)
+		if money >= 0 then
+			self.removeInventoryItem("cash", money)
+			local cash = self.getInventoryItem('cash')
+			if cash ~= nil then
+				if self.getAccount('money').money ~= cash.count then
+					self.setAccountMoney('money', cash.count)
+				end
+			else
+				self.setAccountMoney('money', 0)
+			end
+		end
 	end
 
 	function self.getIdentifier()
@@ -177,82 +206,77 @@ function CreateExtendedPlayer(playerId, identifier, group, accounts, inventory, 
 		end
 	end
 
+	-- addAccountMoney (Modified by Frontside Scripts)
 	function self.addAccountMoney(accountName, money)
 		if money > 0 then
-			local account = self.getAccount(accountName)
+			if accountName == 'money' then
+				self.addInventoryItem("cash", money)
+				local cash = self.getInventoryItem('cash')
+				if self.getAccount('money').money ~= cash.count then
+					self.setAccountMoney('money', cash.count)
+				end
+			else
+				local account = self.getAccount(accountName)
+				if account then
+					local newMoney = account.money + ESX.Math.Round(money)
+					account.money = newMoney
 
-			if account then
-				local newMoney = account.money + ESX.Math.Round(money)
-				account.money = newMoney
-
-				self.triggerEvent('esx:setAccountMoney', account)
+					self.triggerEvent('esx:setAccountMoney', account)
+				end
 			end
 		end
 	end
 
+	-- removeAccountMoney (Modified by Frontside Scripts)
 	function self.removeAccountMoney(accountName, money)
 		if money > 0 then
-			local account = self.getAccount(accountName)
-
-			if account then
-				local newMoney = account.money - ESX.Math.Round(money)
-				account.money = newMoney
-
-				self.triggerEvent('esx:setAccountMoney', account)
-			end
-		end
-	end
-
-	function self.getInventoryItem(name)
-		for k,v in ipairs(self.inventory) do
-			if v.name == name then
-				return v
-			end
-		end
-	end
-
-	function self.addInventoryItem(name, count)
-		local item = self.getInventoryItem(name)
-
-		if item then
-			count = ESX.Math.Round(count)
-			item.count = item.count + count
-			self.weight = self.weight + (item.weight * count)
-
-			TriggerEvent('esx:onAddInventoryItem', self.source, item.name, item.count)
-			self.triggerEvent('esx:addInventoryItem', item.name, item.count)
-		end
-	end
-
-	function self.removeInventoryItem(name, count)
-		local item = self.getInventoryItem(name)
-
-		if item then
-			count = ESX.Math.Round(count)
-			local newCount = item.count - count
-
-			if newCount >= 0 then
-				item.count = newCount
-				self.weight = self.weight - (item.weight * count)
-
-				TriggerEvent('esx:onRemoveInventoryItem', self.source, item.name, item.count)
-				self.triggerEvent('esx:removeInventoryItem', item.name, item.count)
-			end
-		end
-	end
-
-	function self.setInventoryItem(name, count)
-		local item = self.getInventoryItem(name)
-
-		if item and count >= 0 then
-			count = ESX.Math.Round(count)
-
-			if count > item.count then
-				self.addInventoryItem(item.name, count - item.count)
+			if accountName == 'money' then
+				self.removeInventoryItem("cash", money)
+				local cash = self.getInventoryItem('cash')
+				if cash ~= nil then
+					if self.getAccount('money').money ~= cash.count then
+						self.setAccountMoney('money', cash.count)
+					end
+				else
+					self.setAccountMoney('money', 0)
+				end
 			else
-				self.removeInventoryItem(item.name, item.count - count)
+				local account = self.getAccount(accountName)
+				if account then
+					local newMoney = account.money - ESX.Math.Round(money)
+					account.money = newMoney
+
+					self.triggerEvent('esx:setAccountMoney', account)
+				end
 			end
 		end
+	end
+
+	-- getInventoryItem (Modified by Frontside Scripts)
+	function self.getInventoryItem(name)
+		local Item = exports['fs-inventory']:GetItem(self.source, name)
+		if Item == "xPlayernil" then
+			return "xPlayernil"
+		end
+		if Item ~= nil then
+			Item.count = Item.amount
+			return Item
+		end
+		return nil
+	end
+
+	-- addInventoryItem (Modified by Frontside Scripts)
+	function self.addInventoryItem(name, count)
+	   TriggerEvent('inventory:server:addItem', self.source, name, count)	
+	end
+
+	-- removeInventoryItem (Modified by Frontside Scripts)
+	function self.removeInventoryItem(name, count)
+	   TriggerEvent('inventory:server:removeItem', self.source, name, count)
+	end
+
+	-- setInventoryItem (Modified by Frontside Scripts)
+	function self.setInventoryItem(name, count)
 	end
 
 	function self.getWeight()
@@ -263,11 +287,8 @@ function CreateExtendedPlayer(playerId, identifier, group, accounts, inventory, 
 		return self.maxWeight
 	end
 
+	-- canCarryItem (Modified by Frontside Scripts)
 	function self.canCarryItem(name, count)
-		local currentWeight, itemWeight = self.weight, ESX.Items[name].weight
-		local newWeight = currentWeight + (itemWeight * count)
-
-		return newWeight <= self.maxWeight
 	end
 
 	function self.canSwapItem(firstItem, firstItemCount, testItem, testItemCount)
