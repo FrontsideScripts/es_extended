@@ -4,7 +4,8 @@ Config.Locale = 'en'
 Config.Accounts = {
 	bank = _U('account_bank'),
 	black_money = _U('account_black_money'),
-	money = _U('account_money')
+	money = _U('account_money'),
+	premium = _U('account_money') -- Premium money (Added by Frontside Scripts)
 }
 
 Config.StartingAccountMoney 	= {bank = 50000}
@@ -14,7 +15,7 @@ Config.EnableHud            	= true -- enable the default hud? Display current j
 Config.MaxWeight            	= 24   -- the max inventory weight without backpack
 Config.PaycheckInterval         = 7 * 60000 -- how often to recieve pay checks in milliseconds
 Config.EnableDebug              = false -- Use Debug options?
-Config.EnableDefaultInventory   = true -- Display the default Inventory ( F2 )
+Config.EnableDefaultInventory   = false -- Display the default Inventory ( F2 ) (Disabled by Frontside Scripts)
 Config.EnableWantedLevel    	= false -- Use Normal GTA wanted Level?
 Config.EnablePVP                = true -- Allow Player to player combat
 
