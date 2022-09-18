@@ -163,6 +163,7 @@ Core.TriggerServerCallback = function(name, requestId, source, cb, ...)
 	end
 end
 
+-- Save Player (modified by Frontside Scripts)
 Core.SavePlayer = function(xPlayer, cb)
     MySQL.prepare('UPDATE `users` SET `accounts` = ?, `job` = ?, `job_grade` = ?, `group` = ?, `position` = ? WHERE `identifier` = ?', {
 	json.encode(xPlayer.getAccounts(true)),
@@ -179,6 +180,7 @@ Core.SavePlayer = function(xPlayer, cb)
     end)
 end
 
+-- Save Players (modified by Frontside Scripts)
 Core.SavePlayers = function(cb)
     local xPlayers = ESX.GetExtendedPlayers()
     local count = #xPlayers
@@ -254,6 +256,7 @@ ESX.GetIdentifier = function(playerId)
 	end
 end
 
+-- Usable items (modified by Frontside Scripts)
 ESX.RegisterUsableItem = function(item, cb)
   TriggerEvent('inventory:server:useable', item, cb)
 end
